@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 import type { User } from '../App';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import appLogo from 'figma:asset/bb5b37bda783ba021845fb1b2c4aa7a6ef0ca067.png';
 
 interface LoginScreenProps {
   onLoginSuccess: (user: User) => void;
@@ -38,7 +39,7 @@ export function LoginScreen({ onLoginSuccess, onSignupClick }: LoginScreenProps)
     setTimeout(() => {
       const user: User = {
         id: '1',
-        firstName: 'John',
+        firstName: 'Mohamed',
         lastName: 'Doe',
         mobileNumber: mobileNumber,
         biometricEnabled: true,
@@ -54,7 +55,7 @@ export function LoginScreen({ onLoginSuccess, onSignupClick }: LoginScreenProps)
     setTimeout(() => {
       const user: User = {
         id: '1',
-        firstName: 'John',
+        firstName: 'Mohamed',
         lastName: 'Doe',
         mobileNumber: '+1234567890',
         biometricEnabled: true,
@@ -79,10 +80,8 @@ export function LoginScreen({ onLoginSuccess, onSignupClick }: LoginScreenProps)
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <div className="flex items-center justify-center mb-3">
-            <div className="bg-red-600 rounded-full p-5 shadow-xl">
-              <Shield className="size-10 text-white" />
-            </div>
+          <div className="flex items-center justify-center mb-4">
+            <img src={appLogo} alt="MySOS Logo" className="h-20 w-auto" />
           </div>
           <h1 className="text-red-600 mb-1 text-xl">{t('welcome.to')}</h1>
           <p className="text-gray-600 text-sm px-4">{t('emergency.services')}</p>

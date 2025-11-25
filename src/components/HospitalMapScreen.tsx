@@ -7,49 +7,106 @@ import type { Hospital, Address } from '../App';
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { ImageWithFallback } from './figma/ImageWithFallback';
 
 interface HospitalMapScreenProps {
   destinationAddress: Address;
   onHospitalSelect: (hospital: Hospital) => void;
   onBack: () => void;
+  onChangeAddress?: () => void;
 }
 
 const nearbyHospitals: Hospital[] = [
   {
     id: 'h1',
-    name: 'City General Hospital',
-    address: '123 Medical Center Dr',
+    name: 'As-Salam International Hospital',
+    address: 'مستشفى السلام الدولي فرع',
     distance: 1.2,
-    rating: 4.8,
+    rating: 4.4,
     position: { lat: 0.3, lng: 0.2 },
     available: true,
+    type: 'Hospital',
+    reviews: '1.5K',
+    status: 'Open 24 hours',
+    logoUrl: 'https://medal-egypt.com/wp-content/uploads/2014/08/Medal-Logos3-300x133.png',
   },
   {
     id: 'h2',
-    name: 'St. Mary Medical Center',
-    address: '456 Healthcare Ave',
-    distance: 2.5,
-    rating: 4.6,
+    name: 'Health Care City',
+    address: '90 N Teseen',
+    distance: 2.1,
+    rating: 4.4,
     position: { lat: -0.2, lng: 0.4 },
     available: true,
+    type: 'Medical Center',
+    reviews: '109',
+    status: 'Open 24 hours',
+    logoUrl: 'https://www.hcc-eg.com/images/logo.png',
   },
   {
     id: 'h3',
-    name: 'Emergency Care Clinic',
-    address: '789 Urgent Care Blvd',
-    distance: 3.8,
-    rating: 4.5,
+    name: 'Nasaaem Hospital',
+    address: 'Unnamed Road',
+    distance: 2.8,
+    rating: 4.4,
     position: { lat: 0.4, lng: -0.3 },
     available: true,
+    type: 'Hospital',
+    reviews: '2.9K',
+    status: 'Open 24 hours',
+    logoUrl: 'https://nasaaem.com/storage/settings/July2021/uX3ONnnXMb5i31Lmh8ZQ.png',
   },
   {
     id: 'h4',
-    name: 'Metro Health Center',
-    address: '321 Wellness Street',
-    distance: 4.2,
-    rating: 4.7,
+    name: 'Queens Royal Hospital',
+    address: 'HCC bldg., Tesaeen St, behind Air Force Hospital، 90 N Teseen St',
+    distance: 3.2,
+    rating: 3.9,
     position: { lat: -0.3, lng: -0.2 },
+    available: true,
+    type: 'Hospital',
+    reviews: '298',
+    status: 'Open 24 hours',
+    logoUrl: 'https://queensroyalhospital.com/wp-content/uploads/2025/10/primary-scaled.png',
+  },
+  {
+    id: 'h5',
+    name: 'Town Hospital',
+    address: '14 - 15 Street 53',
+    distance: 3.5,
+    rating: 4.0,
+    position: { lat: 0.2, lng: 0.5 },
+    available: true,
+    type: 'General hospital',
+    reviews: '195',
+    status: 'Open 24 hours',
+    logoUrl: 'https://book.townhospitaleg.com/wp-content/uploads/2025/07/cropped-292393712_414456944041890_5670542424899492488_n.png',
+  },
+  {
+    id: 'h6',
+    name: 'Tabarak New Cairo Hospital (TNCH)',
+    address: 'رقم 53 الحي الأول المنطقه السابعه تقاطع شارع التسعين الجنوبي',
+    distance: 4.1,
+    rating: 4.4,
+    position: { lat: -0.4, lng: 0.3 },
+    available: true,
+    type: 'Hospital',
+    reviews: '718',
+    status: 'Open 24 hours',
+    logoUrl: 'https://tabaraknewcairohospital.com/wp-content/uploads/2022/11/logo-1.png',
+  },
+  {
+    id: 'h7',
+    name: 'Air Force Specialized Hospital',
+    address: '2C9M+2M2، EL, N Teseen St',
+    distance: 4.8,
+    rating: 3.6,
+    position: { lat: 0.5, lng: -0.4 },
     available: false,
+    type: 'Military hospital',
+    reviews: '1.4K',
+    status: 'Open 24 hours',
+    logoUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQs6KHQ1nDlBaJyWZ80njJFYGt4TTnd3pZuBg&s',
   },
 ];
 
@@ -62,7 +119,7 @@ const cairoStreets = [
   { name: 'شارع الهرم', x1: 15, y1: 60, x2: 85, y2: 40 },
 ];
 
-export function HospitalMapScreen({ destinationAddress, onHospitalSelect, onBack }: HospitalMapScreenProps) {
+export function HospitalMapScreen({ destinationAddress, onHospitalSelect, onBack, onChangeAddress }: HospitalMapScreenProps) {
   const { t } = useLanguage();
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
 
@@ -112,13 +169,21 @@ export function HospitalMapScreen({ destinationAddress, onHospitalSelect, onBack
             <LanguageSwitcher />
           </div>
           {/* Destination Badge - Compact */}
-          <div className="bg-white rounded-lg p-2 shadow-lg">
+          <div 
+            className={`bg-white rounded-lg p-2 shadow-lg ${onChangeAddress ? 'cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors' : ''}`}
+            onClick={onChangeAddress}
+          >
             <div className="flex items-center gap-2">
               <MapPin className="size-4 text-red-600" />
               <div className="flex-1 min-w-0">
                 <p className="text-gray-900 text-sm truncate">{destinationAddress.street}</p>
                 <p className="text-gray-600 text-xs truncate">القاهرة، مصر</p>
               </div>
+              {onChangeAddress && (
+                <div className="text-red-600 text-xs opacity-70">
+                  {t('change')}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -293,7 +358,7 @@ export function HospitalMapScreen({ destinationAddress, onHospitalSelect, onBack
 
         {nearbyHospitals.map((hospital, idx) => {
           const isSelected = selectedHospital?.id === hospital.id;
-          const estimatedTime = Math.round(hospital.distance * 3);
+          const estimatedTime = Math.round(hospital.distance * 12.5);
 
           return (
             <motion.div
@@ -313,17 +378,33 @@ export function HospitalMapScreen({ destinationAddress, onHospitalSelect, onBack
                 onClick={() => hospital.available && setSelectedHospital(hospital)}
               >
                 <div className="flex items-start gap-2 mb-2">
-                  <div className={`rounded-full p-1.5 ${
-                    hospital.available ? 'bg-red-100' : 'bg-gray-100'
-                  }`}>
-                    <Navigation2 className={`size-4 ${
-                      hospital.available ? 'text-red-600' : 'text-gray-400'
-                    }`} />
-                  </div>
+                  {/* Hospital Logo */}
+                  {hospital.logoUrl ? (
+                    <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-white border border-gray-200 flex items-center justify-center overflow-hidden">
+                      <ImageWithFallback 
+                        src={hospital.logoUrl}
+                        alt={hospital.name}
+                        className="w-full h-full object-contain p-1"
+                      />
+                    </div>
+                  ) : (
+                    <div className={`rounded-full p-1.5 ${
+                      hospital.available ? 'bg-red-100' : 'bg-gray-100'
+                    }`}>
+                      <Navigation2 className={`size-4 ${
+                        hospital.available ? 'text-red-600' : 'text-gray-400'
+                      }`} />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-0.5">
-                      <h4 className="text-gray-900 text-sm">{hospital.name}</h4>
-                      <Badge className={`text-xs ${
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-gray-900 text-sm">{hospital.name}</h4>
+                        {hospital.type && (
+                          <p className="text-gray-500 text-xs">{hospital.type}</p>
+                        )}
+                      </div>
+                      <Badge className={`text-xs flex-shrink-0 ml-2 ${
                         hospital.available
                           ? 'bg-green-500 text-white'
                           : 'bg-gray-400 text-white'
@@ -332,7 +413,7 @@ export function HospitalMapScreen({ destinationAddress, onHospitalSelect, onBack
                       </Badge>
                     </div>
                     <div className="flex items-center gap-1.5 text-gray-600 mb-1.5">
-                      <MapPin className="size-3" />
+                      <MapPin className="size-3 flex-shrink-0" />
                       <p className="text-xs truncate">{hospital.address}</p>
                     </div>
                     <div className="flex items-center gap-3 text-gray-700 text-xs">
@@ -347,6 +428,9 @@ export function HospitalMapScreen({ destinationAddress, onHospitalSelect, onBack
                       <div className="flex items-center gap-1">
                         <Star className="size-3 fill-yellow-400 text-yellow-400" />
                         <span>{hospital.rating}</span>
+                        {hospital.reviews && (
+                          <span className="text-gray-500">({hospital.reviews})</span>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ServiceSelection } from './components/ServiceSelection';
 import { TrackingScreen } from './components/TrackingScreen';
 import { LandingScreen } from './components/LandingScreen';
 import { HospitalMapScreen } from './components/HospitalMapScreen';
 import { PaymentScreen } from './components/PaymentScreen';
 import { AddressSelectionScreen } from './components/AddressSelectionScreen';
+import { AddNewAddressScreen } from './components/AddNewAddressScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { SignupScreen } from './components/SignupScreen';
+import { SplashScreen } from './components/SplashScreen';
 import { LanguageProvider } from './contexts/LanguageContext';
 
 export type ServiceType = {
@@ -35,6 +37,10 @@ export type Hospital = {
   rating: number;
   position: { lat: number; lng: number };
   available: boolean;
+  type?: string;
+  reviews?: string;
+  status?: string;
+  logoUrl?: string;
 };
 
 export type User = {
@@ -58,13 +64,34 @@ export type EmergencyRequest = {
 };
 
 export default function App() {
-  const [screen, setScreen] = useState<'login' | 'signup' | 'landing' | 'address' | 'map' | 'services' | 'payment' | 'tracking'>('login');
+  const [showSplash, setShowSplash] = useState(true);
+  const [screen, setScreen] = useState<'login' | 'signup' | 'landing' | 'address' | 'addNewAddress' | 'map' | 'services' | 'payment' | 'tracking'>('login');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   const [selectedServices, setSelectedServices] = useState<ServiceType[]>([]);
   const [emergencyRequest, setEmergencyRequest] = useState<EmergencyRequest | null>(null);
   const [orderHistory, setOrderHistory] = useState<EmergencyRequest[]>([]);
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
+
+  // Show splash screen for 3 seconds on app load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Default address for emergency services
+  const defaultAddress: Address = {
+    id: 'current',
+    label: 'Current Location',
+    name: 'Current Location',
+    street: '123 Main Street, Nasr City',
+    city: 'Cairo',
+    isCurrent: true,
+  };
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
@@ -77,12 +104,23 @@ export default function App() {
   };
 
   const handleSOSClick = () => {
-    setScreen('address');
+    // Set default address and go directly to hospital map
+    setSelectedAddress(defaultAddress);
+    setScreen('map');
   };
 
   const handleAddressConfirm = (address: Address) => {
     setSelectedAddress(address);
     setScreen('map');
+  };
+
+  const handleSaveNewAddress = (address: Address) => {
+    // Save the new address to the list
+    setSavedAddresses(prev => [...prev, address]);
+    // Select it as the current address
+    setSelectedAddress(address);
+    // Go back to address selection screen
+    setScreen('address');
   };
 
   const handleHospitalSelect = (hospital: Hospital) => {
@@ -163,61 +201,75 @@ export default function App() {
   return (
     <LanguageProvider>
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 max-w-md mx-auto">
-        {screen === 'login' && (
-          <LoginScreen 
-            onLoginSuccess={handleLogin}
-            onSignupClick={() => setScreen('signup')}
-          />
-        )}
-        {screen === 'signup' && (
-          <SignupScreen 
-            onSignupSuccess={handleSignupSuccess}
-            onBackToLogin={() => setScreen('login')}
-          />
-        )}
-        {screen === 'landing' && currentUser && (
-          <LandingScreen 
-            user={currentUser}
-            onSOSClick={handleSOSClick}
-            activeOrder={emergencyRequest}
-            orderHistory={orderHistory}
-            onViewOrder={handleViewOrder}
-          />
-        )}
-        {screen === 'address' && (
-          <AddressSelectionScreen 
-            onAddressConfirm={handleAddressConfirm}
-            onBack={() => setScreen('landing')}
-          />
-        )}
-        {screen === 'map' && selectedAddress && (
-          <HospitalMapScreen 
-            destinationAddress={selectedAddress}
-            onHospitalSelect={handleHospitalSelect}
-            onBack={() => setScreen('address')}
-          />
-        )}
-        {screen === 'services' && selectedHospital && (
-          <ServiceSelection 
-            hospital={selectedHospital}
-            onServicesConfirm={handleServicesConfirm}
-            onBack={() => setScreen('map')}
-          />
-        )}
-        {screen === 'payment' && selectedHospital && selectedServices.length > 0 && (
-          <PaymentScreen 
-            services={selectedServices}
-            hospital={selectedHospital}
-            onPaymentComplete={handlePaymentComplete}
-            onBack={() => setScreen('services')}
-          />
-        )}
-        {screen === 'tracking' && emergencyRequest && (
-          <TrackingScreen 
-            request={emergencyRequest}
-            onCancel={handleCancel}
-            onBackToHome={handleBackToHome}
-          />
+        {showSplash ? (
+          <SplashScreen />
+        ) : (
+          <>
+            {screen === 'login' && (
+              <LoginScreen 
+                onLoginSuccess={handleLogin}
+                onSignupClick={() => setScreen('signup')}
+              />
+            )}
+            {screen === 'signup' && (
+              <SignupScreen 
+                onSignupSuccess={handleSignupSuccess}
+                onBackToLogin={() => setScreen('login')}
+              />
+            )}
+            {screen === 'landing' && currentUser && (
+              <LandingScreen 
+                user={currentUser}
+                onSOSClick={handleSOSClick}
+                activeOrder={emergencyRequest}
+                orderHistory={orderHistory}
+                onViewOrder={handleViewOrder}
+              />
+            )}
+            {screen === 'address' && (
+              <AddressSelectionScreen 
+                onAddressConfirm={handleAddressConfirm}
+                onBack={() => setScreen('landing')}
+                onAddNewAddress={() => setScreen('addNewAddress')}
+              />
+            )}
+            {screen === 'addNewAddress' && (
+              <AddNewAddressScreen 
+                onSave={handleSaveNewAddress}
+                onBack={() => setScreen('address')}
+              />
+            )}
+            {screen === 'map' && selectedAddress && (
+              <HospitalMapScreen 
+                destinationAddress={selectedAddress}
+                onHospitalSelect={handleHospitalSelect}
+                onBack={() => setScreen('landing')}
+                onChangeAddress={() => setScreen('address')}
+              />
+            )}
+            {screen === 'services' && selectedHospital && (
+              <ServiceSelection 
+                hospital={selectedHospital}
+                onServicesConfirm={handleServicesConfirm}
+                onBack={() => setScreen('map')}
+              />
+            )}
+            {screen === 'payment' && selectedHospital && selectedServices.length > 0 && (
+              <PaymentScreen 
+                services={selectedServices}
+                hospital={selectedHospital}
+                onPaymentComplete={handlePaymentComplete}
+                onBack={() => setScreen('services')}
+              />
+            )}
+            {screen === 'tracking' && emergencyRequest && (
+              <TrackingScreen 
+                request={emergencyRequest}
+                onCancel={handleCancel}
+                onBackToHome={handleBackToHome}
+              />
+            )}
+          </>
         )}
       </div>
     </LanguageProvider>

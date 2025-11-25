@@ -8,6 +8,7 @@ import { Switch } from './ui/switch';
 import type { User as UserType } from '../App';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import appLogo from 'figma:asset/bb5b37bda783ba021845fb1b2c4aa7a6ef0ca067.png';
 
 interface SignupScreenProps {
   onSignupSuccess: (user: UserType) => void;
@@ -84,10 +85,8 @@ export function SignupScreen({ onSignupSuccess, onBackToLogin }: SignupScreenPro
         <div className="max-w-md mx-auto w-full space-y-3">
           {/* Logo & Header - Compact */}
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <div className="bg-red-600 rounded-full p-4 shadow-xl">
-                <Shield className="size-8 text-white" />
-              </div>
+            <div className="flex items-center justify-center mb-3">
+              <img src={appLogo} alt="MySOS Logo" className="h-16 w-auto" />
             </div>
             <h1 className="text-red-600 mb-1 text-lg">{t('create.account')}</h1>
             <p className="text-gray-600 text-sm px-4">{t('join.emergency')}</p>

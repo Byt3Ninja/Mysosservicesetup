@@ -11,21 +11,22 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 interface AddressSelectionScreenProps {
   onAddressConfirm: (address: Address) => void;
   onBack: () => void;
+  onAddNewAddress?: () => void;
 }
 
-const savedAddresses: Address[] = [
+const addresses: Address[] = [
   {
     id: 'current',
     label: 'Current Location',
     name: 'My Location',
-    street: '123 Main Street',
-    city: 'San Francisco, CA 94102',
+    street: 'Nasr City, Cairo',
+    city: 'Cairo, Egypt',
     isCurrent: true,
   },
   {
     id: 'home',
     label: 'Home',
-    name: "John's Home",
+    name: "Mohamed's Home",
     street: '456 Oak Avenue',
     city: 'San Francisco, CA 94103',
   },
@@ -45,9 +46,9 @@ const savedAddresses: Address[] = [
   },
 ];
 
-export function AddressSelectionScreen({ onAddressConfirm, onBack }: AddressSelectionScreenProps) {
+export function AddressSelectionScreen({ onAddressConfirm, onBack, onAddNewAddress }: AddressSelectionScreenProps) {
   const { t } = useLanguage();
-  const [selectedAddress, setSelectedAddress] = useState<Address>(savedAddresses[0]);
+  const [selectedAddress, setSelectedAddress] = useState<Address>(addresses[0]);
 
   const getIcon = (address: Address) => {
     if (address.isCurrent) return Navigation2;
@@ -99,7 +100,7 @@ export function AddressSelectionScreen({ onAddressConfirm, onBack }: AddressSele
 
       {/* Address List - Scrollable with compact cards */}
       <div className="flex-1 overflow-y-auto px-4 pt-3 pb-20 space-y-2.5">
-        {savedAddresses.map((address, idx) => {
+        {addresses.map((address, idx) => {
           const Icon = getIcon(address);
           const isSelected = selectedAddress.id === address.id;
 
@@ -163,23 +164,28 @@ export function AddressSelectionScreen({ onAddressConfirm, onBack }: AddressSele
         })}
 
         {/* Add New Address - Compact */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: savedAddresses.length * 0.05 }}
-        >
-          <Card className="p-3.5 cursor-pointer border border-dashed border-gray-300 hover:border-red-400 hover:bg-red-50 transition-all active:scale-98 bg-white">
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl p-2.5 bg-gray-100">
-                <Plus className="size-5 text-gray-600" />
+        {onAddNewAddress && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: addresses.length * 0.05 }}
+          >
+            <Card 
+              className="p-3.5 cursor-pointer border border-dashed border-gray-300 hover:border-red-400 hover:bg-red-50 transition-all active:scale-98 bg-white"
+              onClick={onAddNewAddress}
+            >
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl p-2.5 bg-gray-100">
+                  <Plus className="size-5 text-gray-600" />
+                </div>
+                <div>
+                  <h3 className="text-gray-900">{t('add.new.address')}</h3>
+                  <p className="text-gray-600 text-sm">{t('save.family.location')}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-gray-900">{t('add.new.address')}</h3>
-                <p className="text-gray-600 text-sm">{t('save.family.location')}</p>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
+            </Card>
+          </motion.div>
+        )}
       </div>
 
       {/* Fixed Bottom Button - Compact */}

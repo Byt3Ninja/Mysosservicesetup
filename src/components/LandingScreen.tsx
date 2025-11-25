@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import type { User, EmergencyRequest } from '../App';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import appLogo from 'figma:asset/bb5b37bda783ba021845fb1b2c4aa7a6ef0ca067.png';
 
 interface LandingScreenProps {
   user: User;
@@ -66,14 +67,14 @@ export function LandingScreen({ user, onSOSClick, activeOrder, orderHistory, onV
     <div className="h-screen flex flex-col p-4 bg-gradient-to-br from-red-50 to-orange-50">
       {/* Header - Compact */}
       <div className="flex justify-between items-center mb-4">
-        <div>
-          <motion.h1
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-red-600 text-xl"
-          >
-            {t('app.name')}
-          </motion.h1>
+        <div className="flex items-center gap-3">
+          <motion.img 
+            src={appLogo} 
+            alt="MySOS Logo" 
+            className="h-10 w-auto"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+          />
           <p className="text-gray-600 text-sm">{t('welcome')}, {user.firstName}!</p>
         </div>
         <LanguageSwitcher />
