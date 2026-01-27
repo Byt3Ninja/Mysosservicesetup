@@ -1,0 +1,2491 @@
+openapi: 3.0.3
+info:
+  title: MySOS Emergency Medical Service API
+  description: |
+    Complete API documentation for MySOS - Emergency Medical Service Application for the Egyptian market.
+    
+    ## Features
+    - Emergency medical service booking and tracking
+    - Real-time ambulance and team tracking
+    - Multi-service selection (Emergency, Ambulance, Diagnostic, Laboratory)
+    - Payment processing in EGP
+    - Bilingual support (Arabic/English)
+    - Address management for family members
+    - Hospital and service provider management
+    
+    ## Authentication
+    All protected endpoints require a Bearer token in the Authorization header.
+    
+    ## Emergency Hotline
+    12345
+    
+  version: 1.0.0
+  contact:
+    name: MySOS API Support
+    email: support@mysos.eg
+  license:
+    name: Proprietary
+    
+servers:
+  - url: https://{projectId}.supabase.co/functions/v1/make-server-f04a3591
+    description: Production Server
+    variables:
+      projectId:
+        default: your-project-id
+        description: Supabase Project ID
+  - url: http://localhost:54321/functions/v1/make-server-f04a3591
+    description: Local Development Server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization endpoints
+  - name: User Profile
+    description: User profile management
+  - name: Addresses
+    description: Address management for emergency services
+  - name: Hospitals
+    description: Hospital information and availability
+  - name: Services
+    description: Medical services catalog
+  - name: Orders
+    description: Emergency order management
+  - name: Live Tracking
+    description: Real-time team tracking
+  - name: Payments
+    description: Payment processing and management
+  - name: Reviews
+    description: Rating and review system
+  - name: Notifications
+    description: User notifications
+
+paths:
+  # ============================================================================
+  # AUTHENTICATION ENDPOINTS
+  # ============================================================================
+  
+  /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Create a new user account with mobile number and PIN code
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Mobile number already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user with mobile number and PIN code
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many login attempts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Logout current user and invalidate access token
+      operationId: logout
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/verify-biometric:
+    post:
+      tags:
+        - Authentication
+      summary: Verify biometric authentication
+      description: Authenticate user using biometric token (Face ID/Fingerprint)
+      operationId: verifyBiometric
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BiometricVerifyRequest'
+      responses:
+        '200':
+          description: Biometric verification successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BiometricVerifyResponse'
+        '401':
+          description: Invalid biometric token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/reset-pin:
+    post:
+      tags:
+        - Authentication
+      summary: Reset PIN code
+      description: Reset user PIN code using verification code sent via SMS
+      operationId: resetPin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPinRequest'
+      responses:
+        '200':
+          description: PIN reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid verification code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/change-pin:
+    post:
+      tags:
+        - Authentication
+      summary: Change PIN code
+      description: Change user PIN code (requires current PIN)
+      operationId: changePin
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePinRequest'
+      responses:
+        '200':
+          description: PIN changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid current PIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================================
+  # USER PROFILE ENDPOINTS
+  # ============================================================================
+  
+  /user/profile:
+    get:
+      tags:
+        - User Profile
+      summary: Get user profile
+      description: Retrieve current user's profile information
+      operationId: getUserProfile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    put:
+      tags:
+        - User Profile
+      summary: Update user profile
+      description: Update user profile information
+      operationId: updateUserProfile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/profile-photo:
+    post:
+      tags:
+        - User Profile
+      summary: Upload profile photo
+      description: Upload or update user profile photo
+      operationId: uploadProfilePhoto
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+              required:
+                - photo
+      responses:
+        '200':
+          description: Photo uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      photoUrl:
+                        type: string
+                        example: "https://project.supabase.co/storage/v1/object/sign/make-f04a3591-user-photos/user-123.jpg"
+        '400':
+          description: Invalid file format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================================
+  # ADDRESS ENDPOINTS
+  # ============================================================================
+  
+  /addresses:
+    get:
+      tags:
+        - Addresses
+      summary: Get all addresses
+      description: Retrieve all saved addresses for the current user
+      operationId: getAddresses
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Addresses retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressListResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      tags:
+        - Addresses
+      summary: Create new address
+      description: Add a new address for emergency services
+      operationId: createAddress
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAddressRequest'
+      responses:
+        '201':
+          description: Address created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /addresses/{addressId}:
+    put:
+      tags:
+        - Addresses
+      summary: Update address
+      description: Update an existing address
+      operationId: updateAddress
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "addr_abc123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAddressRequest'
+      responses:
+        '200':
+          description: Address updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '404':
+          description: Address not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    delete:
+      tags:
+        - Addresses
+      summary: Delete address
+      description: Delete a saved address
+      operationId: deleteAddress
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "addr_abc123"
+      responses:
+        '200':
+          description: Address deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Address not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /addresses/{addressId}/set-default:
+    put:
+      tags:
+        - Addresses
+      summary: Set default address
+      description: Set an address as the default
+      operationId: setDefaultAddress
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "addr_abc123"
+      responses:
+        '200':
+          description: Default address updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Address not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================================
+  # HOSPITAL ENDPOINTS
+  # ============================================================================
+  
+  /hospitals:
+    get:
+      tags:
+        - Hospitals
+      summary: Get nearby hospitals
+      description: Retrieve list of hospitals near a location
+      operationId: getHospitals
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+            example: 30.0444
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+            example: 31.2357
+        - name: radius
+          in: query
+          required: false
+          schema:
+            type: number
+            default: 50
+            example: 25
+          description: Search radius in kilometers
+        - name: services
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Filter by service IDs
+      responses:
+        '200':
+          description: Hospitals retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HospitalListResponse'
+
+  /hospitals/{hospitalId}:
+    get:
+      tags:
+        - Hospitals
+      summary: Get hospital details
+      description: Retrieve detailed information about a specific hospital
+      operationId: getHospitalById
+      parameters:
+        - name: hospitalId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "hosp_dar_al_fouad"
+      responses:
+        '200':
+          description: Hospital details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HospitalResponse'
+        '404':
+          description: Hospital not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /hospitals/{hospitalId}/availability:
+    get:
+      tags:
+        - Hospitals
+      summary: Check hospital availability
+      description: Check if hospital can provide requested services
+      operationId: checkHospitalAvailability
+      parameters:
+        - name: hospitalId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "hosp_dar_al_fouad"
+        - name: serviceIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Availability information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HospitalAvailabilityResponse'
+
+  # ============================================================================
+  # SERVICE ENDPOINTS
+  # ============================================================================
+  
+  /services:
+    get:
+      tags:
+        - Services
+      summary: Get all services
+      description: Retrieve list of available medical services
+      operationId: getServices
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [emergency, ambulance, diagnostic, laboratory]
+        - name: hospitalId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Services retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceListResponse'
+
+  /services/{serviceId}:
+    get:
+      tags:
+        - Services
+      summary: Get service details
+      description: Retrieve detailed information about a specific service
+      operationId: getServiceById
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "svc_er_doctor"
+      responses:
+        '200':
+          description: Service details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponse'
+        '404':
+          description: Service not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================================
+  # ORDER ENDPOINTS
+  # ============================================================================
+  
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: Get user orders
+      description: Retrieve list of orders for the current user
+      operationId: getOrders
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pending, confirmed, dispatched, enroute, arrived, completed, cancelled]
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 10
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      tags:
+        - Orders
+      summary: Create new order
+      description: Create a new emergency service order
+      operationId: createOrder
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{orderId}:
+    get:
+      tags:
+        - Orders
+      summary: Get order details
+      description: Retrieve detailed information about a specific order
+      operationId: getOrderById
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "ord_abc123xyz"
+      responses:
+        '200':
+          description: Order details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailResponse'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{orderId}/cancel:
+    put:
+      tags:
+        - Orders
+      summary: Cancel order
+      description: Cancel an existing order
+      operationId: cancelOrder
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "ord_abc123xyz"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  example: "Service no longer needed"
+              required:
+                - reason
+      responses:
+        '200':
+          description: Order cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{orderId}/reorder:
+    post:
+      tags:
+        - Orders
+      summary: Reorder
+      description: Create a new order based on a previous order
+      operationId: reorder
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "ord_abc123xyz"
+      responses:
+        '201':
+          description: Reorder created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Original order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================================
+  # LIVE TRACKING ENDPOINTS
+  # ============================================================================
+  
+  /orders/{orderId}/tracking:
+    get:
+      tags:
+        - Live Tracking
+      summary: Get tracking information
+      description: Get current tracking information for an active order
+      operationId: getOrderTracking
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "ord_abc123xyz"
+      responses:
+        '200':
+          description: Tracking information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackingResponse'
+        '404':
+          description: Order not found or not trackable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================================
+  # PAYMENT ENDPOINTS
+  # ============================================================================
+  
+  /payments/payment-methods:
+    get:
+      tags:
+        - Payments
+      summary: Get saved payment methods
+      description: Retrieve all saved payment methods for the user
+      operationId: getPaymentMethods
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Payment methods retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethodListResponse'
+    
+    post:
+      tags:
+        - Payments
+      summary: Add payment method
+      description: Save a new payment method
+      operationId: addPaymentMethod
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddPaymentMethodRequest'
+      responses:
+        '201':
+          description: Payment method added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethodResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/payment-methods/{paymentMethodId}:
+    delete:
+      tags:
+        - Payments
+      summary: Delete payment method
+      description: Remove a saved payment method
+      operationId: deletePaymentMethod
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: paymentMethodId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "pm_abc123"
+      responses:
+        '200':
+          description: Payment method deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Payment method not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/process:
+    post:
+      tags:
+        - Payments
+      summary: Process payment
+      description: Process payment for an order
+      operationId: processPayment
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessPaymentRequest'
+      responses:
+        '200':
+          description: Payment processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentTransactionResponse'
+        '400':
+          description: Payment failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/refund:
+    post:
+      tags:
+        - Payments
+      summary: Request refund
+      description: Request a refund for a completed payment
+      operationId: requestRefund
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderId:
+                  type: string
+                  example: "ord_abc123xyz"
+                reason:
+                  type: string
+                  example: "Service not provided as expected"
+              required:
+                - orderId
+                - reason
+      responses:
+        '200':
+          description: Refund processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentTransactionResponse'
+        '400':
+          description: Refund not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================================
+  # REVIEW ENDPOINTS
+  # ============================================================================
+  
+  /reviews:
+    post:
+      tags:
+        - Reviews
+      summary: Submit review
+      description: Submit a review for a completed order
+      operationId: createReview
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRequest'
+      responses:
+        '201':
+          description: Review submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+        '400':
+          description: Validation error or order not eligible for review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /reviews/hospital/{hospitalId}:
+    get:
+      tags:
+        - Reviews
+      summary: Get hospital reviews
+      description: Retrieve reviews for a specific hospital
+      operationId: getHospitalReviews
+      parameters:
+        - name: hospitalId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "hosp_dar_al_fouad"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 10
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Reviews retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewListResponse'
+
+  # ============================================================================
+  # NOTIFICATION ENDPOINTS
+  # ============================================================================
+  
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: Get notifications
+      description: Retrieve user notifications
+      operationId: getNotifications
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: unreadOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Notifications retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationListResponse'
+
+  /notifications/{notificationId}/read:
+    put:
+      tags:
+        - Notifications
+      summary: Mark notification as read
+      description: Mark a specific notification as read
+      operationId: markNotificationRead
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "notif_abc123"
+      responses:
+        '200':
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /notifications/mark-all-read:
+    put:
+      tags:
+        - Notifications
+      summary: Mark all notifications as read
+      description: Mark all user notifications as read
+      operationId: markAllNotificationsRead
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: All notifications marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+# ============================================================================
+# COMPONENTS
+# ============================================================================
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token obtained from login/signup
+
+  schemas:
+    # ========================================================================
+    # AUTHENTICATION SCHEMAS
+    # ========================================================================
+    
+    SignupRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - mobileNumber
+        - pinCode
+        - languagePreference
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Mohamed"
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: "Ahmed"
+        mobileNumber:
+          type: string
+          pattern: '^\+20[0-9]{10}$'
+          example: "+201234567890"
+          description: Egyptian phone number format
+        pinCode:
+          type: string
+          pattern: '^[0-9]{4,6}$'
+          example: "123456"
+          description: 4-6 digit PIN code
+        languagePreference:
+          type: string
+          enum: [ar, en]
+          example: "ar"
+
+    SignupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            userId:
+              type: string
+              example: "user_abc123xyz"
+            accessToken:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        message:
+          type: string
+          example: "Account created successfully"
+
+    LoginRequest:
+      type: object
+      required:
+        - mobileNumber
+        - pinCode
+      properties:
+        mobileNumber:
+          type: string
+          example: "+201234567890"
+        pinCode:
+          type: string
+          example: "123456"
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            userId:
+              type: string
+              example: "user_abc123xyz"
+            accessToken:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            user:
+              $ref: '#/components/schemas/UserProfile'
+        message:
+          type: string
+          example: "Login successful"
+
+    BiometricVerifyRequest:
+      type: object
+      required:
+        - userId
+        - biometricToken
+      properties:
+        userId:
+          type: string
+          example: "user_abc123xyz"
+        biometricToken:
+          type: string
+          example: "biometric_token_xyz"
+
+    BiometricVerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    ResetPinRequest:
+      type: object
+      required:
+        - mobileNumber
+        - verificationCode
+        - newPinCode
+      properties:
+        mobileNumber:
+          type: string
+          example: "+201234567890"
+        verificationCode:
+          type: string
+          example: "123456"
+        newPinCode:
+          type: string
+          pattern: '^[0-9]{4,6}$'
+          example: "654321"
+
+    ChangePinRequest:
+      type: object
+      required:
+        - currentPinCode
+        - newPinCode
+      properties:
+        currentPinCode:
+          type: string
+          example: "123456"
+        newPinCode:
+          type: string
+          pattern: '^[0-9]{4,6}$'
+          example: "654321"
+
+    # ========================================================================
+    # USER PROFILE SCHEMAS
+    # ========================================================================
+    
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: "user_abc123xyz"
+        firstName:
+          type: string
+          example: "Mohamed"
+        lastName:
+          type: string
+          example: "Ahmed"
+        mobileNumber:
+          type: string
+          example: "+201234567890"
+        email:
+          type: string
+          format: email
+          example: "mohamed.ahmed@example.com"
+        profilePhoto:
+          type: string
+          example: "https://project.supabase.co/storage/v1/object/sign/user-photos/user-123.jpg"
+        bloodType:
+          type: string
+          enum: [A+, A-, B+, B-, AB+, AB-, O+, O-]
+          example: "A+"
+        medicalConditions:
+          type: array
+          items:
+            type: string
+          example: ["Diabetes", "Hypertension"]
+        allergies:
+          type: array
+          items:
+            type: string
+          example: ["Penicillin"]
+        emergencyContact:
+          type: object
+          properties:
+            name:
+              type: string
+              example: "Fatima Ahmed"
+            phone:
+              type: string
+              example: "+201234567891"
+            relationship:
+              type: string
+              example: "Wife"
+        languagePreference:
+          type: string
+          enum: [ar, en]
+          example: "ar"
+        biometricEnabled:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-01-27T14:20:00Z"
+
+    UserProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/UserProfile'
+
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: "Mohamed"
+        lastName:
+          type: string
+          example: "Ahmed"
+        email:
+          type: string
+          format: email
+          example: "mohamed.ahmed@example.com"
+        bloodType:
+          type: string
+          enum: [A+, A-, B+, B-, AB+, AB-, O+, O-]
+        medicalConditions:
+          type: array
+          items:
+            type: string
+        allergies:
+          type: array
+          items:
+            type: string
+        emergencyContact:
+          type: object
+          properties:
+            name:
+              type: string
+            phone:
+              type: string
+            relationship:
+              type: string
+        languagePreference:
+          type: string
+          enum: [ar, en]
+        biometricEnabled:
+          type: boolean
+
+    # ========================================================================
+    # ADDRESS SCHEMAS
+    # ========================================================================
+    
+    Address:
+      type: object
+      properties:
+        addressId:
+          type: string
+          example: "addr_abc123"
+        userId:
+          type: string
+          example: "user_abc123xyz"
+        label:
+          type: string
+          enum: [home, work, family, other]
+          example: "home"
+        personName:
+          type: string
+          example: "Mohamed Ahmed"
+        mobileNumber:
+          type: string
+          example: "+201234567890"
+        streetAddress:
+          type: string
+          example: "123 Tahrir Street"
+        buildingNumber:
+          type: string
+          example: "45"
+        floor:
+          type: string
+          example: "3"
+        apartment:
+          type: string
+          example: "12"
+        landmark:
+          type: string
+          example: "Near Cairo Opera House"
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+              example: 30.0444
+            longitude:
+              type: number
+              format: double
+              example: 31.2357
+        isDefault:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-01-27T14:20:00Z"
+
+    CreateAddressRequest:
+      type: object
+      required:
+        - label
+        - personName
+        - mobileNumber
+        - streetAddress
+        - buildingNumber
+        - coordinates
+      properties:
+        label:
+          type: string
+          enum: [home, work, family, other]
+          example: "home"
+        personName:
+          type: string
+          example: "Mohamed Ahmed"
+        mobileNumber:
+          type: string
+          example: "+201234567890"
+        streetAddress:
+          type: string
+          example: "123 Tahrir Street"
+        buildingNumber:
+          type: string
+          example: "45"
+        floor:
+          type: string
+          example: "3"
+        apartment:
+          type: string
+          example: "12"
+        landmark:
+          type: string
+          example: "Near Cairo Opera House"
+        coordinates:
+          type: object
+          required:
+            - latitude
+            - longitude
+          properties:
+            latitude:
+              type: number
+              format: double
+              example: 30.0444
+            longitude:
+              type: number
+              format: double
+              example: 31.2357
+        isDefault:
+          type: boolean
+          example: false
+
+    UpdateAddressRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          enum: [home, work, family, other]
+        personName:
+          type: string
+        mobileNumber:
+          type: string
+        streetAddress:
+          type: string
+        buildingNumber:
+          type: string
+        floor:
+          type: string
+        apartment:
+          type: string
+        landmark:
+          type: string
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+            longitude:
+              type: number
+              format: double
+        isDefault:
+          type: boolean
+
+    AddressResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Address'
+        message:
+          type: string
+          example: "Address created successfully"
+
+    AddressListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+
+    # ========================================================================
+    # HOSPITAL SCHEMAS
+    # ========================================================================
+    
+    Hospital:
+      type: object
+      properties:
+        hospitalId:
+          type: string
+          example: "hosp_dar_al_fouad"
+        name:
+          type: string
+          example: "Dar Al Fouad Hospital"
+        nameAr:
+          type: string
+          example: "مستشفى دار الفؤاد"
+        type:
+          type: string
+          enum: [private, public, teaching]
+          example: "private"
+        logo:
+          type: string
+          example: "https://project.supabase.co/storage/v1/object/hospital-logos/dar-al-fouad.png"
+        rating:
+          type: number
+          format: float
+          example: 4.5
+        reviewCount:
+          type: integer
+          example: 1234
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+              example: 30.0444
+            longitude:
+              type: number
+              format: double
+              example: 31.2357
+        address:
+          type: string
+          example: "6th October City, Giza"
+        addressAr:
+          type: string
+          example: "مدينة السادس من أكتوبر، الجيزة"
+        phone:
+          type: string
+          example: "+20238351000"
+        availableServices:
+          type: array
+          items:
+            type: string
+          example: ["svc_er_doctor", "svc_bls_ambulance", "svc_ultrasound"]
+        operatingHours:
+          type: object
+          properties:
+            open:
+              type: string
+              example: "00:00"
+            close:
+              type: string
+              example: "23:59"
+        averageArrivalTime:
+          type: integer
+          description: Average arrival time in minutes
+          example: 18
+        active:
+          type: boolean
+          example: true
+
+    HospitalResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Hospital'
+
+    HospitalListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hospital'
+
+    HospitalAvailabilityResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            available:
+              type: boolean
+              example: true
+            estimatedArrival:
+              type: integer
+              description: Estimated arrival time in minutes
+              example: 18
+            availableTeams:
+              type: integer
+              example: 3
+
+    # ========================================================================
+    # SERVICE SCHEMAS
+    # ========================================================================
+    
+    Service:
+      type: object
+      properties:
+        serviceId:
+          type: string
+          example: "svc_er_doctor"
+        category:
+          type: string
+          enum: [emergency, ambulance, diagnostic, laboratory]
+          example: "emergency"
+        name:
+          type: string
+          example: "ER Doctor"
+        nameAr:
+          type: string
+          example: "طبيب طوارئ"
+        description:
+          type: string
+          example: "Emergency room doctor for urgent medical care"
+        descriptionAr:
+          type: string
+          example: "طبيب غرفة طوارئ للرعاية الطبية العاجلة"
+        priceMin:
+          type: number
+          format: float
+          example: 500
+        priceMax:
+          type: number
+          format: float
+          example: 800
+        estimatedDuration:
+          type: integer
+          description: Estimated duration in minutes
+          example: 30
+        available:
+          type: boolean
+          example: true
+
+    ServiceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Service'
+
+    ServiceListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+
+    # ========================================================================
+    # ORDER SCHEMAS
+    # ========================================================================
+    
+    Order:
+      type: object
+      properties:
+        orderId:
+          type: string
+          example: "ord_abc123xyz"
+        userId:
+          type: string
+          example: "user_abc123xyz"
+        hospitalId:
+          type: string
+          example: "hosp_dar_al_fouad"
+        hospitalName:
+          type: string
+          example: "Dar Al Fouad Hospital"
+        addressId:
+          type: string
+          example: "addr_abc123"
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+        subtotal:
+          type: number
+          format: float
+          example: 1500
+        serviceFee:
+          type: number
+          format: float
+          example: 150
+        totalAmount:
+          type: number
+          format: float
+          example: 1650
+        paymentMethod:
+          type: string
+          enum: [cash, card, wallet]
+          example: "cash"
+        paymentStatus:
+          type: string
+          enum: [pending, paid, refunded]
+          example: "pending"
+        specialInstructions:
+          type: string
+          example: "Please bring portable oxygen"
+        status:
+          type: string
+          enum: [pending, confirmed, dispatched, enroute, arrived, completed, cancelled]
+          example: "confirmed"
+        teamId:
+          type: string
+          example: "team_xyz789"
+        estimatedArrival:
+          type: string
+          format: date-time
+          example: "2026-01-27T15:30:00Z"
+        actualArrival:
+          type: string
+          format: date-time
+          example: "2026-01-27T15:28:00Z"
+        completedAt:
+          type: string
+          format: date-time
+          example: "2026-01-27T16:15:00Z"
+        cancelledAt:
+          type: string
+          format: date-time
+        cancellationReason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-27T15:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-01-27T15:30:00Z"
+
+    CreateOrderRequest:
+      type: object
+      required:
+        - hospitalId
+        - addressId
+        - serviceIds
+        - paymentMethod
+      properties:
+        hospitalId:
+          type: string
+          example: "hosp_dar_al_fouad"
+        addressId:
+          type: string
+          example: "addr_abc123"
+        serviceIds:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 10
+          example: ["svc_er_doctor", "svc_bls_ambulance"]
+        paymentMethod:
+          type: string
+          enum: [cash, card, wallet]
+          example: "cash"
+        paymentMethodId:
+          type: string
+          example: "pm_abc123"
+        specialInstructions:
+          type: string
+          maxLength: 500
+          example: "Please bring portable oxygen"
+
+    OrderResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Order'
+        message:
+          type: string
+          example: "Order created successfully"
+
+    OrderListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            orders:
+              type: array
+              items:
+                $ref: '#/components/schemas/Order'
+            total:
+              type: integer
+              example: 42
+            hasMore:
+              type: boolean
+              example: true
+
+    OrderEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          example: "order_placed"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-01-27T15:00:00Z"
+        description:
+          type: string
+          example: "Order placed successfully"
+        descriptionAr:
+          type: string
+          example: "تم تقديم الطلب بنجاح"
+
+    EmergencyTeam:
+      type: object
+      properties:
+        teamId:
+          type: string
+          example: "team_xyz789"
+        hospitalId:
+          type: string
+          example: "hosp_dar_al_fouad"
+        members:
+          type: array
+          items:
+            type: object
+            properties:
+              memberId:
+                type: string
+                example: "member_123"
+              name:
+                type: string
+                example: "Dr. Ahmed Hassan"
+              role:
+                type: string
+                enum: [doctor, nurse, paramedic, driver, technician]
+                example: "doctor"
+              photo:
+                type: string
+                example: "https://example.com/photos/dr-ahmed.jpg"
+              phone:
+                type: string
+                example: "+201234567890"
+              certifications:
+                type: array
+                items:
+                  type: string
+                example: ["Emergency Medicine", "ACLS"]
+        vehicleType:
+          type: string
+          enum: [ambulance, car, motorcycle]
+          example: "ambulance"
+        licensePlate:
+          type: string
+          example: "ABC 1234"
+        currentLocation:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+              example: 30.0444
+            longitude:
+              type: number
+              format: double
+              example: 31.2357
+            heading:
+              type: number
+              format: float
+              example: 45.5
+            speed:
+              type: number
+              format: float
+              example: 60
+            timestamp:
+              type: string
+              format: date-time
+              example: "2026-01-27T15:25:00Z"
+        status:
+          type: string
+          enum: [available, dispatched, busy, offline]
+          example: "dispatched"
+        rating:
+          type: number
+          format: float
+          example: 4.8
+        completedOrders:
+          type: integer
+          example: 247
+
+    OrderDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          allOf:
+            - $ref: '#/components/schemas/Order'
+            - type: object
+              properties:
+                address:
+                  $ref: '#/components/schemas/Address'
+                hospital:
+                  $ref: '#/components/schemas/Hospital'
+                team:
+                  $ref: '#/components/schemas/EmergencyTeam'
+                payment:
+                  $ref: '#/components/schemas/PaymentTransaction'
+                timeline:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/OrderEvent'
+
+    # ========================================================================
+    # TRACKING SCHEMAS
+    # ========================================================================
+    
+    TrackingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            team:
+              $ref: '#/components/schemas/EmergencyTeam'
+            currentLocation:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                  format: double
+                  example: 30.0444
+                longitude:
+                  type: number
+                  format: double
+                  example: 31.2357
+                heading:
+                  type: number
+                  format: float
+                  example: 45.5
+                timestamp:
+                  type: string
+                  format: date-time
+                  example: "2026-01-27T15:25:00Z"
+            estimatedArrival:
+              type: integer
+              description: Estimated arrival time in minutes
+              example: 12
+            distanceRemaining:
+              type: number
+              format: float
+              description: Distance remaining in kilometers
+              example: 8.5
+            route:
+              type: array
+              items:
+                type: object
+                properties:
+                  latitude:
+                    type: number
+                    format: double
+                  longitude:
+                    type: number
+                    format: double
+
+    # ========================================================================
+    # PAYMENT SCHEMAS
+    # ========================================================================
+    
+    PaymentMethod:
+      type: object
+      properties:
+        paymentMethodId:
+          type: string
+          example: "pm_abc123"
+        userId:
+          type: string
+          example: "user_abc123xyz"
+        type:
+          type: string
+          enum: [card, wallet]
+          example: "card"
+        cardBrand:
+          type: string
+          example: "Visa"
+        cardLast4:
+          type: string
+          example: "4242"
+        cardExpiry:
+          type: string
+          example: "12/28"
+        walletProvider:
+          type: string
+          enum: [vodafone, orange, etisalat]
+          example: "vodafone"
+        walletPhone:
+          type: string
+          example: "+201234567890"
+        isDefault:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-15T10:30:00Z"
+
+    AddPaymentMethodRequest:
+      type: object
+      required:
+        - type
+        - isDefault
+      properties:
+        type:
+          type: string
+          enum: [card, wallet]
+          example: "card"
+        cardNumber:
+          type: string
+          example: "4242424242424242"
+        cardExpiry:
+          type: string
+          example: "12/28"
+        cardCvv:
+          type: string
+          example: "123"
+        cardholderName:
+          type: string
+          example: "Mohamed Ahmed"
+        walletProvider:
+          type: string
+          enum: [vodafone, orange, etisalat]
+        walletPhone:
+          type: string
+          example: "+201234567890"
+        isDefault:
+          type: boolean
+          example: false
+
+    PaymentMethodResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/PaymentMethod'
+        message:
+          type: string
+          example: "Payment method added successfully"
+
+    PaymentMethodListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethod'
+
+    PaymentTransaction:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          example: "txn_abc123xyz"
+        orderId:
+          type: string
+          example: "ord_abc123xyz"
+        userId:
+          type: string
+          example: "user_abc123xyz"
+        amount:
+          type: number
+          format: float
+          example: 1650
+        currency:
+          type: string
+          example: "EGP"
+        method:
+          type: string
+          enum: [cash, card, wallet]
+          example: "card"
+        status:
+          type: string
+          enum: [pending, completed, failed, refunded]
+          example: "completed"
+        cardLast4:
+          type: string
+          example: "4242"
+        cardBrand:
+          type: string
+          example: "Visa"
+        walletProvider:
+          type: string
+          example: "vodafone"
+        gatewayResponse:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-27T15:00:00Z"
+        completedAt:
+          type: string
+          format: date-time
+          example: "2026-01-27T15:00:30Z"
+
+    ProcessPaymentRequest:
+      type: object
+      required:
+        - orderId
+      properties:
+        orderId:
+          type: string
+          example: "ord_abc123xyz"
+        paymentMethodId:
+          type: string
+          example: "pm_abc123"
+
+    PaymentTransactionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/PaymentTransaction'
+        message:
+          type: string
+          example: "Payment processed successfully"
+
+    # ========================================================================
+    # REVIEW SCHEMAS
+    # ========================================================================
+    
+    Review:
+      type: object
+      properties:
+        reviewId:
+          type: string
+          example: "rev_abc123"
+        orderId:
+          type: string
+          example: "ord_abc123xyz"
+        userId:
+          type: string
+          example: "user_abc123xyz"
+        hospitalId:
+          type: string
+          example: "hosp_dar_al_fouad"
+        teamId:
+          type: string
+          example: "team_xyz789"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        comment:
+          type: string
+          example: "Excellent service, very professional team"
+        aspectRatings:
+          type: object
+          properties:
+            punctuality:
+              type: integer
+              minimum: 1
+              maximum: 5
+              example: 5
+            professionalism:
+              type: integer
+              minimum: 1
+              maximum: 5
+              example: 5
+            communication:
+              type: integer
+              minimum: 1
+              maximum: 5
+              example: 4
+            service:
+              type: integer
+              minimum: 1
+              maximum: 5
+              example: 5
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-27T16:30:00Z"
+
+    CreateReviewRequest:
+      type: object
+      required:
+        - orderId
+        - rating
+      properties:
+        orderId:
+          type: string
+          example: "ord_abc123xyz"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        comment:
+          type: string
+          maxLength: 1000
+          example: "Excellent service, very professional team"
+        aspectRatings:
+          type: object
+          properties:
+            punctuality:
+              type: integer
+              minimum: 1
+              maximum: 5
+            professionalism:
+              type: integer
+              minimum: 1
+              maximum: 5
+            communication:
+              type: integer
+              minimum: 1
+              maximum: 5
+            service:
+              type: integer
+              minimum: 1
+              maximum: 5
+
+    ReviewResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Review'
+        message:
+          type: string
+          example: "Review submitted successfully"
+
+    ReviewListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            reviews:
+              type: array
+              items:
+                $ref: '#/components/schemas/Review'
+            averageRating:
+              type: number
+              format: float
+              example: 4.5
+            total:
+              type: integer
+              example: 1234
+
+    # ========================================================================
+    # NOTIFICATION SCHEMAS
+    # ========================================================================
+    
+    Notification:
+      type: object
+      properties:
+        notificationId:
+          type: string
+          example: "notif_abc123"
+        userId:
+          type: string
+          example: "user_abc123xyz"
+        type:
+          type: string
+          enum: [order_update, team_assigned, team_arrived, payment, promo]
+          example: "team_assigned"
+        title:
+          type: string
+          example: "Team Assigned"
+        titleAr:
+          type: string
+          example: "تم تعيين الفريق"
+        message:
+          type: string
+          example: "Dr. Ahmed Hassan has been assigned to your order"
+        messageAr:
+          type: string
+          example: "تم تعيين الدكتور أحمد حسن لطلبك"
+        orderId:
+          type: string
+          example: "ord_abc123xyz"
+        read:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-27T15:05:00Z"
+
+    NotificationListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            notifications:
+              type: array
+              items:
+                $ref: '#/components/schemas/Notification'
+            unreadCount:
+              type: integer
+              example: 3
+
+    # ========================================================================
+    # COMMON SCHEMAS
+    # ========================================================================
+    
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+              description: Error code for programmatic handling
+            message:
+              type: string
+              example: "Invalid mobile number format"
+            messageAr:
+              type: string
+              example: "تنسيق رقم الهاتف المحمول غير صحيح"
+            details:
+              type: object
+              description: Additional error details for debugging
