@@ -2709,6 +2709,23 @@ Response:
 - Profile: 4 endpoints
 - Support: 5 endpoints
 
+---
+
+**Complete API Specification:** `/src/app/swagger.yaml`
+
+For comprehensive API documentation including all endpoints, request/response schemas, authentication methods, and error codes, please refer to the **MySOS API Swagger Specification** (`swagger.yaml`).
+
+The Swagger file provides:
+- ✅ Complete REST API endpoint definitions for Employee app
+- ✅ Request and response schemas for orders, location updates, payments
+- ✅ Authentication and authorization specifications (PIN + Biometric)
+- ✅ Error code definitions and handling
+- ✅ Data models and types
+- ✅ Rate limiting and throttling rules
+- ✅ WebSocket event specifications for real-time order updates
+
+**Note:** The Swagger specification is the single source of truth for API contracts shared across all MySOS applications (Customer App, Admin Dashboard, Hospital Dashboard, and Employee App).
+
 ### Appendix E: Compliance Checklist
 
 **Data Protection:**

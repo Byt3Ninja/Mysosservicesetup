@@ -2165,6 +2165,23 @@ Response:
 - Egyptian Data Protection Law
 - Ministry of Health Emergency Service Guidelines
 
+### Appendix D: API Documentation Reference
+
+**Complete API Specification:** `/src/app/swagger.yaml`
+
+For comprehensive API documentation including all endpoints, request/response schemas, authentication methods, and error codes, please refer to the **MySOS API Swagger Specification** (`swagger.yaml`).
+
+The Swagger file provides:
+- ✅ Complete REST API endpoint definitions
+- ✅ Request and response schemas
+- ✅ Authentication and authorization specifications
+- ✅ Error code definitions and handling
+- ✅ Data models and types
+- ✅ Rate limiting and throttling rules
+- ✅ WebSocket event specifications
+
+**Note:** The Swagger specification is the single source of truth for API contracts shared across all MySOS applications (Customer App, Admin Dashboard, Hospital Dashboard, and Employee App).
+
 ### Appendix C: Contact Information
 - **Project Manager**: [Name, Email, Phone]
 - **Technical Lead**: [Name, Email, Phone]

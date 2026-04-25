@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Phone, MapPin, Clock, Navigation, Building2, Package, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { Phone, MapPin, Clock, Navigation, Building2, Package, CheckCircle, AlertCircle, Loader, MessageCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -11,10 +11,11 @@ interface TrackingScreenProps {
   request: EmergencyRequest;
   onCancel: () => void;
   onBackToHome: () => void;
+  onOpenChat?: () => void;
 }
 
-export function TrackingScreen({ request, onCancel, onBackToHome }: TrackingScreenProps) {
-  const { t } = useLanguage();
+export function TrackingScreen({ request, onCancel, onBackToHome, onOpenChat }: TrackingScreenProps) {
+  const { t, isRTL } = useLanguage();
   const [currentETA, setCurrentETA] = useState(request.eta);
   const [routeProgress, setRouteProgress] = useState(0); // 0 to 100 along the route
   const [progress, setProgress] = useState(0);
@@ -38,6 +39,7 @@ export function TrackingScreen({ request, onCancel, onBackToHome }: TrackingScre
       case 'accepted': return { text: t('team.assigned'), color: 'bg-blue-500', icon: CheckCircle, description: t('team.accepted') };
       case 'on-the-way': return { text: t('team.on.way'), color: 'bg-green-500', icon: Navigation, description: t('team.heading') };
       case 'arrived': return { text: t('team.arrived'), color: 'bg-purple-500', icon: CheckCircle, description: t('team.arrived.location') };
+      case 'in_progress': return { text: isRTL ? 'الخدمة قيد التنفيذ' : 'Service In Progress', color: 'bg-indigo-500', icon: Package, description: isRTL ? 'الفريق يقدم الخدمة الآن' : 'Team is providing service now' };
       default: return { text: 'Unknown', color: 'bg-gray-500', icon: AlertCircle, description: '' };
     }
   };
@@ -209,8 +211,14 @@ export function TrackingScreen({ request, onCancel, onBackToHome }: TrackingScre
           <span className="text-white text-xs font-medium">{statusInfo.text}</span>
         </div>
 
-        {/* Emergency Call Button */}
-        <div className="absolute top-3 right-3 z-20">
+        {/* Emergency Call and Chat Buttons */}
+        <div className="absolute top-3 right-3 z-20 flex gap-2">
+          <Button
+            onClick={onOpenChat}
+            className="rounded-full h-10 w-10 bg-blue-600 hover:bg-blue-700 shadow-lg"
+          >
+            <MessageCircle className="size-5 text-white" />
+          </Button>
           <Button className="rounded-full h-10 w-10 bg-green-600 hover:bg-green-700 shadow-lg">
             <Phone className="size-5 text-white" />
           </Button>

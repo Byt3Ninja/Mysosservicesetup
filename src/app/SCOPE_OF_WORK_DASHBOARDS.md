@@ -3673,6 +3673,23 @@ interface Hospital {
 - Hospital Onboarding Manual
 - Admin User Manual
 
+### Appendix D: API Documentation Reference
+
+**Complete API Specification:** `/src/app/swagger.yaml`
+
+For comprehensive API documentation including all endpoints, request/response schemas, authentication methods, and error codes, please refer to the **MySOS API Swagger Specification** (`swagger.yaml`).
+
+The Swagger file provides:
+- ✅ Complete REST API endpoint definitions for Admin and Hospital dashboards
+- ✅ Request and response schemas for orders, hospitals, teams, payments, analytics
+- ✅ Authentication and authorization specifications (including RBAC)
+- ✅ Error code definitions and handling
+- ✅ Data models and types
+- ✅ Rate limiting and throttling rules
+- ✅ WebSocket event specifications for real-time updates
+
+**Note:** The Swagger specification is the single source of truth for API contracts shared across all MySOS applications (Customer App, Admin Dashboard, Hospital Dashboard, and Employee App).
+
 ### Appendix C: Contact Information
 - **Project Manager**: [Name, Email, Phone]
 - **Technical Lead**: [Name, Email, Phone]

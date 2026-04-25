@@ -9,6 +9,7 @@ import { AddNewAddressScreen } from './components/AddNewAddressScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { SignupScreen } from './components/SignupScreen';
 import { SplashScreen } from './components/SplashScreen';
+import { ChatScreen } from './components/ChatScreen';
 import { LanguageProvider } from './contexts/LanguageContext';
 
 export type ServiceType = {
@@ -55,7 +56,7 @@ export type EmergencyRequest = {
   hospital: Hospital;
   services: ServiceType[];
   destinationAddress: Address;
-  status: 'requested' | 'accepted' | 'on-the-way' | 'arrived' | 'completed' | 'cancelled';
+  status: 'requested' | 'accepted' | 'on-the-way' | 'arrived' | 'in_progress' | 'completed' | 'cancelled';
   eta: number; // in minutes
   teamName: string;
   teamPhone: string;
@@ -65,7 +66,7 @@ export type EmergencyRequest = {
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
-  const [screen, setScreen] = useState<'login' | 'signup' | 'landing' | 'address' | 'addNewAddress' | 'map' | 'services' | 'payment' | 'tracking'>('login');
+  const [screen, setScreen] = useState<'login' | 'signup' | 'landing' | 'address' | 'addNewAddress' | 'map' | 'services' | 'payment' | 'tracking' | 'chat'>('login');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
@@ -198,6 +199,16 @@ export default function App() {
     setScreen('tracking');
   };
 
+  const handleOpenChat = () => {
+    setScreen('chat');
+  };
+
+  const handleCallTeam = () => {
+    if (emergencyRequest) {
+      window.location.href = `tel:${emergencyRequest.teamPhone}`;
+    }
+  };
+
   return (
     <LanguageProvider>
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 max-w-md mx-auto">
@@ -263,10 +274,20 @@ export default function App() {
               />
             )}
             {screen === 'tracking' && emergencyRequest && (
-              <TrackingScreen 
+              <TrackingScreen
                 request={emergencyRequest}
                 onCancel={handleCancel}
                 onBackToHome={handleBackToHome}
+                onOpenChat={handleOpenChat}
+              />
+            )}
+            {screen === 'chat' && emergencyRequest && (
+              <ChatScreen
+                orderId={emergencyRequest.orderId}
+                teamName={emergencyRequest.teamName}
+                teamPhone={emergencyRequest.teamPhone}
+                onBack={() => setScreen('tracking')}
+                onCall={handleCallTeam}
               />
             )}
           </>
