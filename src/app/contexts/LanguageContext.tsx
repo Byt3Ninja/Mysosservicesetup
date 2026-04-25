@@ -176,7 +176,7 @@ const translations = {
     'error.first.name': 'Please enter your first name',
     'error.last.name': 'Please enter your last name',
     'error.mobile': 'Please enter a valid mobile number',
-    'error.pin': 'PIN code must be 4 digits',
+    'error.pin': 'PIN code must be 6 digits',
     'error.pin.match': 'PIN codes do not match',
   },
   ar: {
@@ -343,7 +343,7 @@ const translations = {
     'error.first.name': 'يرجى إدخال اسمك الأول',
     'error.last.name': 'يرجى إدخال اسم عائلتك',
     'error.mobile': 'يرجى إدخال رقم هاتف صالح',
-    'error.pin': 'يجب أن يكون رمز PIN مكوناً من 4 أرقام',
+    'error.pin': 'يجب أن يكون رمز PIN مكوناً من 6 أرقام',
     'error.pin.match': 'رموز PIN غير متطابقة',
   },
 };

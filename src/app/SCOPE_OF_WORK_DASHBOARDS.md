@@ -3492,23 +3492,24 @@ interface Hospital {
 
 ### 12.2 Infrastructure Costs (Monthly)
 
-#### 12.2.1 Hosting
-- Admin Dashboard (Vercel): $20-50
-- Hospital Dashboard (Vercel): $20-50
-- Supabase (Database + Functions): $100-300
-- CDN: $20-100
-- **Total: $160-500/month**
+**IMPORTANT:** The MySOS platform uses **shared infrastructure** across all applications (Customer App, Admin Dashboard, Hospital Dashboard, and Employee App). The costs below are **included in the total shared infrastructure budget** of $500-1,500/month documented in the Customer App scope.
 
-#### 12.2.2 Third-Party Services
-- Email (SendGrid): $50-150
-- SMS (Twilio): $100-300
-- Maps API: $100-300
-- Monitoring (Sentry): $50-100
-- Analytics: $0-50 (Google Analytics free tier)
-- **Total: $300-900/month**
+**For reference only (these costs are part of the shared $500-1,500/month total):**
 
-#### 12.2.3 Total Monthly Cost
-**Estimated: $460-1,400/month**
+#### 12.2.1 Dashboard-Specific Hosting (Included in shared costs)
+- Admin Dashboard CDN: Included in shared Supabase/CDN costs
+- Hospital Dashboard CDN: Included in shared Supabase/CDN costs
+- Shared Supabase Backend: Covered in total infrastructure budget
+- Shared CDN: Covered in total infrastructure budget
+
+#### 12.2.2 Shared Third-Party Services (Included in shared costs)
+- Email, SMS, Maps, Monitoring: All covered in shared infrastructure budget
+- See SCOPE_OF_WORK.md Section 11.2 for complete breakdown
+
+#### 12.2.3 MySOS Total Shared Monthly Infrastructure Cost
+**$500-1,500/month** (for entire ecosystem including dashboards)
+
+**Note:** There are NO additional monthly infrastructure costs for the dashboards beyond the shared backend costs. All applications share the same Supabase backend, third-party services, and infrastructure to minimize costs.
 
 ### 12.3 Development Cost Estimate
 

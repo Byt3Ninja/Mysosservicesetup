@@ -2472,13 +2472,18 @@ Response:
 - **Total Development Infrastructure:** ~$4,500/year
 
 #### 15.2.2 Third-Party Services (Monthly)
-- **Maps API (Mapbox):** $200-500
+
+**IMPORTANT:** The MySOS platform uses **shared infrastructure** across all applications. The backend and most third-party services listed below are **included in the total shared infrastructure budget** of $500-1,500/month documented in the Customer App scope (SCOPE_OF_WORK.md Section 11.2).
+
+**For reference only (these costs are part of the shared infrastructure):**
+- **Maps API (Mapbox):** Included in shared infrastructure ($100-300/month total)
 - **Push Notifications (Firebase):** Free (< 1M messages)
 - **Analytics (Firebase):** Free
 - **Crash Reporting (Crashlytics):** Free
-- **Backend (Supabase):** Included in main platform
-- **SMS (for OTP):** $50-100
-- **Total Monthly Services:** $250-600
+- **Backend (Supabase):** Included in shared infrastructure ($400-1,250/month total)
+- **SMS (for OTP):** Included in shared infrastructure ($50-150/month total)
+
+**NO additional monthly service costs beyond the shared $500-1,500/month**
 
 #### 15.2.3 Ongoing Costs (Annual)
 - Development infrastructure: $4,500

@@ -29,7 +29,7 @@ export function LoginScreen({ onLoginSuccess, onSignupClick }: LoginScreenProps)
       setError(t('error.mobile'));
       return;
     }
-    if (!pinCode || pinCode.length !== 4) {
+    if (!pinCode || pinCode.length !== 6) {
       setError(t('error.pin'));
       return;
     }

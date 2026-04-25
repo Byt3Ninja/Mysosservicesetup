@@ -69,7 +69,7 @@ MySOS is a mobile-first emergency medical service application designed for the E
 #### 3.1.2 Login Screen
 **Features:**
 - Mobile number input (Egyptian format validation)
-- PIN code input (4-6 digits, masked)
+- PIN code input (6 digits, masked)
 - Biometric authentication toggle
 - Language switcher (AR/EN)
 - "Forgot PIN?" link
@@ -88,7 +88,7 @@ MySOS is a mobile-first emergency medical service application designed for the E
 - First Name (required, 2-50 characters)
 - Last Name (required, 2-50 characters)
 - Mobile Number (required, unique, Egyptian format)
-- PIN Code (required, 4-6 digits)
+- PIN Code (required, 6 digits)
 - Confirm PIN Code (must match)
 - Terms & Conditions checkbox (required)
 
@@ -1366,7 +1366,7 @@ Response:
 
 #### 4.6.1 Authentication Security
 - PIN codes hashed with bcrypt (cost factor: 12)
-- Access tokens: JWT with 7-day expiry
+- Access tokens: JWT with 1-hour expiry
 - Refresh tokens: 30-day expiry
 - Biometric tokens: Device-specific, 1-hour expiry
 - Rate limiting on auth endpoints (5 attempts per 15 minutes)
@@ -1993,22 +1993,28 @@ Response:
 
 ### 11.2 Infrastructure Costs (Monthly)
 
-#### 11.2.1 Supabase
-- Database: $25-100 (based on usage)
-- Storage: $10-50
-- Edge Functions: $10-30
-- Bandwidth: $20-80
-- **Total: $65-260/month**
+**IMPORTANT:** The MySOS platform uses a **shared Supabase backend** infrastructure serving all four applications (Customer App, Admin Dashboard, Hospital Dashboard, and Employee App). The costs below represent the **total shared infrastructure**, not per-application costs.
 
-#### 11.2.2 Third-Party Services
-- Map API: $100-300/month
+#### 11.2.1 Shared Supabase Infrastructure
+- Database (PostgreSQL): $150-400/month (all apps)
+- Storage: $50-150/month (all apps)
+- Edge Functions (Serverless): $100-300/month (all apps)
+- Bandwidth & Real-time: $100-400/month (all apps)
+- **Supabase Total: $400-1,250/month**
+
+#### 11.2.2 Shared Third-Party Services
+- Map API (Mapbox/Google Maps): $100-300/month
 - Payment Gateway: 2-3% per transaction
-- SMS Service: $50-150/month
+- SMS Service (Twilio): $50-150/month
+- Email Service (SendGrid): $50-100/month
 - Push Notifications (FCM): Free (Firebase Spark plan)
-- **Total: $150-450/month**
+- Monitoring & Logging: $50-150/month
+- **Third-Party Total: $250-700/month**
 
-#### 11.2.3 Total Monthly Cost
-**Estimated: $215-710/month** (excluding transaction fees)
+#### 11.2.3 Total Shared Monthly Infrastructure Cost
+**Estimated: $500-1,500/month** (excluding transaction fees)
+
+**Note:** This is the cost for the **entire MySOS ecosystem** (all 4 applications), not per application. Backend infrastructure is shared to minimize costs and complexity.
 
 ### 11.3 Maintenance Costs (Annual)
 - Server & infrastructure: $2,600-8,500

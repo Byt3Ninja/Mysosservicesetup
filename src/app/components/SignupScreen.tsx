@@ -34,7 +34,7 @@ export function SignupScreen({ onSignupSuccess, onBackToLogin }: SignupScreenPro
     if (!firstName.trim()) { setError(t('error.first.name')); return; }
     if (!lastName.trim()) { setError(t('error.last.name')); return; }
     if (!mobileNumber || mobileNumber.length < 10) { setError(t('error.mobile')); return; }
-    if (!pinCode || pinCode.length !== 4) { setError(t('error.pin')); return; }
+    if (!pinCode || pinCode.length !== 6) { setError(t('error.pin')); return; }
     if (pinCode !== confirmPin) { setError(t('error.pin.match')); return; }
 
     setIsLoading(true);

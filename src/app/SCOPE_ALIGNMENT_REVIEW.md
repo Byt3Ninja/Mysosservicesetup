@@ -824,19 +824,30 @@ All documents consistently reference:
 
 ### 15.3 Infrastructure Costs (Monthly)
 
-| System | Cost | Status |
-|--------|------|--------|
-| **Customer App Backend** | $215-710 | ✅ Specified |
-| **Admin/Hospital Dashboards** | $460-1,400 | ✅ Specified |
-| **Employee App** | $250-600 | ✅ Specified |
+**IMPORTANT: Shared Backend Architecture**
 
-**Total Monthly Infrastructure:** $925 - $2,710
+The MySOS platform uses a **single shared Supabase backend** serving all four applications (Customer App, Admin Dashboard, Hospital Dashboard, and Employee App). The costs below were originally estimated per app but should **NOT be added together**.
 
-**Note:** Backend is shared, so actual cost would be lower.
+**Individual App Estimates (if separate backends):**
+| System | Cost (if separate) | Status |
+|--------|-------------------|--------|
+| **Customer App Backend** | $215-710 | Historical estimate |
+| **Admin/Hospital Dashboards** | $460-1,400 | Historical estimate |
+| **Employee App** | $250-600 | Historical estimate |
 
-**Recommendation:** ⚠️ Clarify that backend infrastructure is shared across all apps to avoid duplicate counting.
+**❌ Incorrect Total (Double-Counted):** $925 - $2,710/month
 
-**Estimated Actual Cost:** $500-1,500/month (shared infrastructure)
+**✅ Actual Shared Infrastructure Cost:** **$500 - $1,500/month**
+
+**Cost Breakdown (Shared):**
+- Supabase Database (PostgreSQL): $150-400/month
+- Edge Functions (Serverless): $100-300/month
+- Storage (Files, images): $50-150/month
+- Bandwidth & Real-time: $100-400/month
+- Monitoring & Logging: $50-150/month
+- Third-party APIs (Maps, SMS, Email): $50-100/month
+
+**Recommendation:** ✅ **RESOLVED** - All scope documents should reference this shared infrastructure cost of $500-1,500/month to ensure budget accuracy.
 
 ---
 
